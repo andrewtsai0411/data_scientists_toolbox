@@ -101,7 +101,7 @@ class CreateKaggleSurveyDB:
         question_df = pd.DataFrame()
         response_df = pd.DataFrame()
         for survey_year in self.survey_years:
-            if survey_year == 2020:
+            if survey_year == 2022:
                 q_df, r_df = self.tidy_2022_data(survey_year)
             else:
                 q_df, r_df = self.tidy_2020_2021_data(survey_year)
@@ -112,22 +112,22 @@ class CreateKaggleSurveyDB:
         response_df.to_sql('responses', con=connection, if_exists='replace', index=False)
 
         cur = connection.cursor()
-        drop_view_sql = '''DROP ViEW iF EXiSTS aggragatd_responses;'''
+        drop_view_sql = '''DROP VIEW IF EXISTS aggragatd_responses;'''
         create_view_sql ='''
         CREATE VIEW aggregated_responses AS
         SELECT questions.surveyed_in,
-            questions.question_index,
-            questions.question_type,
-            questions.question_description,
-            responses.responses,
-            COUNT(responses.respondent_id) AS response_count
-        FROM questions
-        JOIN responses
+               questions.question_index,
+               questions.question_type,
+               questions.question_description,
+               responses.responses,
+               COUNT(responses.respondent_id) AS response_count
+          FROM questions
+          JOIN responses
             ON questions.question_index = responses.question_index AND
-            questions.surveyed_in = responses.responded_in
+               questions.surveyed_in = responses.responded_in
         GROUP BY questions.surveyed_in,
-                questions.question_index,
-                responses.responses;
+                 questions.question_index,
+                 responses.responses;
     '''
         cur.execute(drop_view_sql)
         cur.execute(create_view_sql)
